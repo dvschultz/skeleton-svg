@@ -70,12 +70,12 @@ class SkeletonSVG:
             }
         }
 
-    RETURN_TYPES = ("IMAGE",)
+    # RETURN_TYPES = ("IMAGE",)
+    RETURN_TYPES = ()
     #RETURN_NAMES = ("image_output_name",)
 
-    FUNCTION = "test"
-
-    #OUTPUT_NODE = False
+    FUNCTION = "saveSVG"
+    OUTPUT_NODE = True
 
     CATEGORY = "SkeletonSVG"
 
@@ -428,7 +428,7 @@ class SkeletonSVG:
         else:
             return f"{prefix}.svg"
 
-    def test(self, images, filename_prefix="ComfyUI_SVG", append_timestamp=False, custom_output_path=""):
+    def saveSVG(self, images, filename_prefix="ComfyUI_SVG", append_timestamp=False, custom_output_path=""):
         output_path = custom_output_path if custom_output_path else self.output_dir
         os.makedirs(output_path, exist_ok=True)
 
@@ -439,6 +439,7 @@ class SkeletonSVG:
         for (batch_number, img) in enumerate(images):
             unique_filename = self.generate_unique_filename(f"{filename_prefix}_{batch_number}", append_timestamp)
             final_filepath = os.path.join(output_path, unique_filename)
+            print(final_filepath)
 
             i = 255. * img.cpu().numpy()
             i2 = np.clip(i, 0, 255).astype(np.uint8)
@@ -447,64 +448,18 @@ class SkeletonSVG:
             im = self.thinning(im)
             rects = []
             polys = self.traceSkeleton(im,0,0,im.shape[1],im.shape[0],10,999,rects)
-            
+
             # filename_with_batch_num = filename.replace("%batch_num%", str(batch_number))
             # file = f"{filename_with_batch_num}_{counter:05}_.svg"
-            self.create_svg_with_multiple_polylines(polys, unique_filename, (1024,1024))
+            self.create_svg_with_multiple_polylines(polys, final_filepath, (i.shape[1],i.shape[0]))
+            print("test")
 
             results.append({
                 "saved_svg": unique_filename, 
                 "path": final_filepath
             })
             
-
-        return { "ui": { results } }
-
-    """
-        The node will always be re executed if any of the inputs change but
-        this method can be used to force the node to execute again even when the inputs don't change.
-        You can make this node return a number or a string. This value will be compared to the one returned the last time the node was
-        executed, if it is different the node will be executed again.
-        This method is used in the core repo for the LoadImage node where they return the image hash as a string, if the image hash
-        changes between executions the LoadImage node is executed again.
-    """
-    #@classmethod
-    #def IS_CHANGED(s, image, string_field, int_field, float_field, print_to_screen):
-    #    return ""
-
-    def saveSVG(self, images, filename_prefix="ComfyUI"):
-        filename_prefix += self.prefix_append
-        full_output_folder, filename, counter, subfolder, filename_prefix = folder_paths.get_save_image_path(filename_prefix, self.output_dir, 1024, 1024)
-        results = list()
-        for (batch_number, image) in enumerate(images):
-            i = 255. * image.cpu().numpy()
-            img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
-
-            filename_with_batch_num = filename.replace("%batch_num%", str(batch_number))
-            file = f"{filename_with_batch_num}_{counter:05}_.svg"
-            
-
-            im0 = cv2.imread("/Users/derrickschultz/Desktop/out-1-invert.png")
-
-            im = (im0[:,:,0]>128).astype(np.uint8)
-            im = thinning(im);
-
-
-            rects = []
-            polys = traceSkeleton(im,0,0,im.shape[1],im.shape[0],10,999,rects)
-  
-            create_svg_with_multiple_polylines(polys, os.path.join(full_output_folder, file), (1000,1000))
-
-            results.append({
-                "filename": file,
-                "subfolder": subfolder,
-                "type": self.type
-            })
-            counter += 1
-
         return { "ui": { "images": results } }
-
-
 
 
 # A dictionary that contains all nodes you want to export with their names
