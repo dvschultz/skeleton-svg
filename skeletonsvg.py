@@ -452,14 +452,18 @@ class SkeletonSVG:
             # filename_with_batch_num = filename.replace("%batch_num%", str(batch_number))
             # file = f"{filename_with_batch_num}_{counter:05}_.svg"
             self.create_svg_with_multiple_polylines(polys, final_filepath, (i.shape[1],i.shape[0]))
-            print("test")
 
             results.append({
                 "saved_svg": unique_filename, 
                 "path": final_filepath
             })
             
+
         return { "ui": { "images": results } }
+
+
+
+
 
 
 # A dictionary that contains all nodes you want to export with their names
