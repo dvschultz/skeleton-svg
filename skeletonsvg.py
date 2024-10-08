@@ -437,7 +437,7 @@ class SkeletonSVG:
         results = list()
 
         for (batch_number, img) in enumerate(images):
-            unique_filename = self.generate_unique_filename(f"{filename_prefix}_{batch_number}", append_timestamp)
+            unique_filename = self.generate_unique_filename(f"{filename_prefix}_{batch_number}", timestamp=True)
             final_filepath = os.path.join(output_path, unique_filename)
             print(final_filepath)
 
